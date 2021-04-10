@@ -14,17 +14,17 @@ fun main() {
 
 class Roby {
 
-    private val genesCount = 243
     private val dnaCount = 200
     private val generationCount = 2000
     private val cleanCount = 100
     private val mutationFactor = 0.01
     private val jarInRoomFactor = 0.5F
+    private val crossProbability = 0.85
 
     fun startEvolution() {
         val initGeneList = mutableListOf<DNA>()
         for (i in 0 until dnaCount) {
-            initGeneList += DNA.generate(genesCount)
+            initGeneList += DNA.randomDNA()
         }
         var cur = initGeneList.toList()
         for (i in 0 until generationCount) {
@@ -65,19 +65,13 @@ class Roby {
     private fun pickParents(list: List<DNA>): List<DNA> {
         val dnaList = processDNAProbability(list)
         val parents = mutableListOf<DNA>()
-        for (i in dnaList.indices) {
-            val randomValue = Random.nextDouble(1.0)
-            var index = 0
-            while (index < dnaList.size) {
-                if (randomValue <= dnaList[index].increaseProbability) {
-                    parents += dnaList[index]
-                    break
-                }
-                index++
-            }
+        while (parents.size < dnaList.size) {
+            val randomValue = Random.nextDouble()
+            dnaList.find { randomValue <= it.increaseProbability }
+                ?.also { parents += it }
         }
-        println("score:${dnaList.map { it.score }.average()}, picked score:${parents.map { it.score }.average()}")
-        println("dna average:${dnaList.map { it.probability }.average()}, parent average:${parents.map { it.probability }.average()}")
+//        println("score:${dnaList.map { it.score }.average()}, picked score:${parents.map { it.score }.average()}")
+//        println("parent average:${parents.map { it.probability }.average()}")
         return parents.sortedBy { it.score }
     }
 
@@ -107,14 +101,25 @@ class Roby {
         var index = 1
         val len = parents[0].genes.size
         while (index < parents.size) {
-            val pivot = Random.nextInt(0, len)
+            var pivot = 0
+            while (pivot == 0 || pivot == len) {
+                pivot = Random.nextInt(0, len)
+            }
             val pre = parents[index - 1]
-            val motherHead = pre.genes.subList(0, pivot)
-            val motherTail = pre.genes.subList(pivot, len)
-            val fatherHead = parents[index].genes.subList(0, pivot)
-            val fatherTail = parents[index].genes.subList(pivot, len)
-            children += DNA((motherHead + fatherTail).toMutableList())
-            children += DNA((fatherHead + motherTail).toMutableList())
+            val father = pre.genes
+            val mother = parents[index].genes
+            val rate = Random.nextDouble()
+            val child1: DNA
+            val child2: DNA
+            if (rate <= crossProbability) {
+                child1 = DNA((father.subList(0, pivot) + mother.subList(pivot, len)).toMutableList())
+                child2 = DNA((mother.subList(0, pivot) + father.subList(pivot, len)).toMutableList())
+            } else {
+                child1 = DNA(father)
+                child2 = DNA(mother)
+            }
+            children += child1
+            children += child2
             index += 2
         }
         if (children.size != parents.size) throw IllegalStateException("parents.size != children.size")

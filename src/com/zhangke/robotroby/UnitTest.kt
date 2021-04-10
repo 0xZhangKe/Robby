@@ -4,10 +4,19 @@ import kotlin.random.Random
 
 fun main() {
     val test = UnitTest()
-    test.test()
+    test.pick()
 }
 
 class UnitTest {
+
+    fun pick(){
+        println(Random.nextDouble())
+        println(Random.nextDouble())
+        println(Random.nextDouble())
+        println(Random.nextDouble())
+        println(Random.nextDouble())
+        println(Random.nextDouble())
+    }
 
     fun test() {
         caseRate1()

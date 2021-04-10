@@ -1,5 +1,6 @@
 package com.zhangke.robotroby
 
+import java.lang.IllegalArgumentException
 import kotlin.random.Random
 
 data class DNA(
@@ -10,11 +11,17 @@ data class DNA(
     var increaseProbability: Double = 0.0
 ) {
 
+    init {
+        if(genes.size != LENGTH) throw IllegalArgumentException("Genes length(${genes.size}) not illegal!")
+    }
+
     companion object {
 
-        fun generate(size: Int): DNA {
+        const val LENGTH = 243
+
+        fun randomDNA(): DNA {
             val item = mutableListOf<Int>()
-            for (i in 0 until size) {
+            for (i in 0 until LENGTH) {
                 item += Random.nextInt(0, 6)
             }
             return DNA(item)
