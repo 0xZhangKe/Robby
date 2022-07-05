@@ -1,16 +1,15 @@
-package com.zhangke.robotroby
+package com.zhangke.robby.ga
 
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.round
 import kotlin.random.Random
 
-
 fun main() {
-    Roby().startEvolution()
+    FirstGenerationRobby().startEvolution()
 }
 
-class Roby {
+class FirstGenerationRobby {
 
     private val dnaCount = 200
     private val generationCount = 2000
@@ -40,7 +39,7 @@ class Roby {
     private fun evolution(geneList: List<DNA>, count: Int): List<DNA> {
         computeScore(geneList)
         printScore(geneList, count)
-        geneList.maxBy { it.score }
+        geneList.maxByOrNull { it.score }
             ?.also { if (it.score > (max?.score ?: 0)) max = it }
         return pickChildren(geneList)
     }
@@ -61,7 +60,7 @@ class Roby {
 
     private fun printScore(dnaList: List<DNA>, generation: Int) {
         val scoreList = dnaList.map { it.score }
-        println("$generation -> average: ${round(scoreList.average()).toInt()}, max: ${scoreList.max()}")
+        println("$generation -> average: ${round(scoreList.average()).toInt()}, max: ${scoreList.maxOrNull()}")
     }
 
     private fun pickChildren(dnaList: List<DNA>): List<DNA> {
@@ -82,7 +81,7 @@ class Roby {
 
     private fun processDNAProbability(list: List<DNA>) {
         // 轮盘赌算法
-        val minScore = abs(list.map { it.score }.min()!!) + 1
+        val minScore = abs(list.minOf { it.score }) + 1
         var total = 0
         list.forEach {
             it.powScore = (it.score + minScore).toDouble().pow(2.0).toInt()
